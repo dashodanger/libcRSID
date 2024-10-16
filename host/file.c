@@ -21,7 +21,7 @@ cRSID_SIDheader *cRSID_processSIDfile(cRSID_C64instance *C64, unsigned char *fil
     }
     C64->RealSIDmode = (SIDheader->MagicString[0] == 'R');
 
-    if (SIDheader->LoadAddressH == 0 && SIDheader->LoadAddressH == 0)
+    if (SIDheader->LoadAddressH == 0 && SIDheader->LoadAddressL == 0)
     { // load-address taken from first 2 bytes of the C64 PRG
         C64->LoadAddress = (filedata[SIDheader->HeaderSize + 1] << 8) + (filedata[SIDheader->HeaderSize + 0]);
         SIDdataOffset    = SIDheader->HeaderSize + 2;
