@@ -22,22 +22,14 @@
 #include <stdint.h>
 #include <string.h>
 
-#define SIDPLAYER_SRCBUF_SAMPLES (4096)
-
-int16_t sid_buf[SIDPLAYER_SRCBUF_SAMPLES];
 cRSID_C64instance *sidplayer_c64 = NULL;
 cRSID_SIDheader *sidplayer_header = NULL;
 
 // common function to read sample stream from mod4play and convert to float
 static void read_samples(float* buffer, int num_samples) {
-    assert(num_samples <= SIDPLAYER_SRCBUF_SAMPLES);
-    memset(sid_buf, 0, SIDPLAYER_SRCBUF_SAMPLES*sizeof(int16_t));
     // NOTE: for multi-channel playback, the samples are interleaved
     // (e.g. left/right/left/right/...)
-    cRSID_generateSound(sidplayer_c64, (unsigned char *)&sid_buf[0], SIDPLAYER_SRCBUF_SAMPLES*sizeof(int16_t));
-    for (int i = 0; i < num_samples; i++) {
-        buffer[i] = (float)sid_buf[i]/32768;
-    }
+    cRSID_generateFloat(sidplayer_c64, buffer, (unsigned short)num_samples*sizeof(float));
 }
 
 // stream callback, called by sokol_audio when new samples are needed,
