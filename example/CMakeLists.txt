@@ -11,14 +11,22 @@ project(
 
 add_executable(
   sidplayer
-  libcRSID.c
-  example/sidplayer-sapp.c
+  sidplayer-sapp.c
 )
+
+add_library(
+  libcrsid
+  ../libcRSID.c
+)
+
+set(SIDPLAYER_LINK_LIBRARIES libcrsid)
 
 # sokol_app/sokol_audio linked libraries
 if (CMAKE_HOST_LINUX)
-  target_link_libraries(sidplayer asound X11 Xi Xcursor GL dl pthread m)
+  set(SIDPLAYER_LINK_LIBRARIES ${SIDPLAYER_LINK_LIBRARIES} asound X11 Xi Xcursor GL dl pthread m)
 endif()
+
+target_link_libraries(sidplayer ${SIDPLAYER_LINK_LIBRARIES})
 
 add_custom_command(
   TARGET sidplayer

@@ -4,7 +4,7 @@ This is an adaptation of the library version of cRSID for embedding in game engi
 # Compilation
 `libcRSID.c` is the only file that needs to be added to your Makefile/CMakeLists/etc. Include `libcRSID.h` in the source file that you are using to handle SID playback.
 
-To compile a test program, please use the CMakeLists file in this directory. It will build a small program that displays a window and replays an embedded SID file.
+To compile a test program, please use the CMakeLists file in the `example` directory. It will build a small program that displays a window and replays an embedded SID file.
 - The test program uses the Sokol libraries which are zlib-licensed and is based on the mod player example from sokol-samples, which is MIT licensed. Neither of these licenses affect libcRSID when compiled on its own.
 
 # Usage

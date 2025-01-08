@@ -76,12 +76,12 @@ void frame(void* user_data) {
 
 void cleanup(void* user_data) {
     (void)user_data;
+    saudio_shutdown();
     cRSID_initC64(sidplayer_c64);
     sidplayer_c64 = NULL;
     // This is where you would free the song buffer, but since it is compiled into the program I have commented it out
     //sidplayer_header = NULL;
     //free(your_original_song_buffer_pointer_here);
-    saudio_shutdown();
     sg_shutdown();
 }
 
