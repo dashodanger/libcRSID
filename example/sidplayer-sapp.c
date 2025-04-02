@@ -16,6 +16,7 @@
 #include "sokol/sokol_audio.h"
 #include "sokol/sokol_log.h"
 #include "sokol/sokol_glue.h"
+#define CRSID_IMPLEMENTATION
 #include "../libcRSID.h"
 #include "data/Edge_of_Disgrace.h"
 #include <assert.h>

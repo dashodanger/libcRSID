@@ -1,8 +1,8 @@
 # libcRSID
-This is an adaptation of the library version of cRSID for embedding in game engines or other applications. Changes have been made for easier compilation in C/C++ environments and with varying compilers (tested with MSVC, GCC, and Clang across different operating systems). SDL and filesystem references have been removed; the library is intended to receive an in-memory SID track and produce samples on demand.
+This is a single-header adaptation of the library version of cRSID for embedding in game engines or other applications. Changes have been made for easier compilation in C/C++ environments and with varying compilers (tested with MSVC, GCC, and Clang across different operating systems). SDL and filesystem references have been removed; the library is intended to receive an in-memory SID track and produce samples on demand.
 
 # Compilation
-`libcRSID.c` is the only file that needs to be added to your Makefile/CMakeLists/etc. Include `libcRSID.h` in the source file that you are using to handle SID playback.
+Define CRSID_IMPLEMENTATION before including libcRSID.h in one source file within your project. It can then be included anywhere else that it needs to be referenced.
 
 To compile a test program, please use the CMakeLists file in the `example` directory. It will build a small program that displays a window and replays an embedded SID file.
 - The test program uses the Sokol libraries which are zlib-licensed and is based on the mod player example from sokol-samples, which is MIT licensed. Neither of these licenses affect libcRSID when compiled on its own.
