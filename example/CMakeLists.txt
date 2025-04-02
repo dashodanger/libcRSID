@@ -15,13 +15,10 @@ add_executable(
 )
 
 # sokol_app/sokol_audio linked libraries
-if (CMAKE_HOST_LINUX)
+if (WIN32 OR MINGW)
+  target_compile_definitions (sidplayer PUBLIC SOKOL_D3D11)
+  target_link_libraries(sidplayer d3d11 winmm kernel32)
+elseif (CMAKE_HOST_LINUX)
+  target_compile_definitions (sidplayer PUBLIC SOKOL_GLCORE33)
   target_link_libraries(sidplayer asound X11 Xi Xcursor GL dl pthread m)
 endif()
-
-add_custom_command(
-  TARGET sidplayer
-  POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E copy "$<TARGET_FILE:sidplayer>"
-          "${CMAKE_CURRENT_LIST_DIR}"
-)

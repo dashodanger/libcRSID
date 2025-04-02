@@ -5,12 +5,7 @@
 //  sokol_audio.h
 //------------------------------------------------------------------------------
 
-#define SOKOL_GLCORE33
-#define SOKOL_GFX_IMPL
-#define SOKOL_AUDIO_IMPL
-#define SOKOL_LOG_IMPL
-#define SOKOL_APP_IMPL
-#define SOKOL_GLUE_IMPL
+#define SOKOL_IMPL
 #include "sokol/sokol_app.h"
 #include "sokol/sokol_gfx.h"
 #include "sokol/sokol_audio.h"
@@ -23,8 +18,10 @@
 #include <stdint.h>
 #include <string.h>
 
-cRSID_C64instance *sidplayer_c64 = NULL;
-cRSID_SIDheader *sidplayer_header = NULL;
+static cRSID_C64instance *sidplayer_c64 = NULL;
+static cRSID_SIDheader *sidplayer_header = NULL;
+static int      user_sid_size = 0;
+static uint8_t *user_sid_buffer = NULL;
 
 // common function to read sample stream from mod4play and convert to float
 static void read_samples(float* buffer, int num_samples) {
@@ -40,7 +37,7 @@ static void stream_cb(float* buffer, int num_frames, int num_channels, void* use
     read_samples(buffer, num_samples);
 }
 
-void init(void* user_data) {
+static void init(void* user_data) {
     // setup sokol_gfx
     sg_setup(&(sg_desc){
         .context = sapp_sgcontext(),
@@ -50,7 +47,10 @@ void init(void* user_data) {
     sidplayer_c64 = cRSID_init(44100);
     if (sidplayer_c64)
     {
-        sidplayer_header = cRSID_processSIDfile(sidplayer_c64, edge_of_disgrace, sizeof(edge_of_disgrace));
+        if (user_sid_buffer != NULL)
+            sidplayer_header = cRSID_processSIDfile(sidplayer_c64, user_sid_buffer, user_sid_size);
+        else
+            sidplayer_header = cRSID_processSIDfile(sidplayer_c64, edge_of_disgrace, sizeof(edge_of_disgrace));
     }
     if (sidplayer_header)
     {
@@ -65,7 +65,7 @@ void init(void* user_data) {
     });
 }
 
-void frame(void* user_data) {
+static void frame(void* user_data) {
     (void)user_data;
     sg_pass_action pass_action = {
         .colors[0] = { .load_action = SG_LOADACTION_CLEAR, .clear_value = { 0.4f, 0.7f, 1.0f, 1.0f } }
@@ -75,19 +75,47 @@ void frame(void* user_data) {
     sg_commit();
 }
 
-void cleanup(void* user_data) {
+static void cleanup(void* user_data) {
     (void)user_data;
     saudio_shutdown();
     cRSID_initC64(sidplayer_c64);
     sidplayer_c64 = NULL;
-    // This is where you would free the song buffer, but since it is compiled into the program I have commented it out
-    //sidplayer_header = NULL;
-    //free(your_original_song_buffer_pointer_here);
+    if (user_sid_buffer)
+    {
+        sidplayer_header = NULL;
+        free(user_sid_buffer);
+        user_sid_buffer = NULL;
+        user_sid_size = 0;
+    }
     sg_shutdown();
 }
 
 sapp_desc sokol_main(int argc, char* argv[]) {
-    (void)argc; (void)argv;
+    // Really simple, assumes the first argument passed is a filename to open;
+    // make something more robust for the real world
+    if (argc > 1)
+    {
+        FILE *user_sid_file = fopen(argv[1], "rb");
+        if (user_sid_file != NULL)
+        {
+            long cur_pos = ftell(user_sid_file);
+            fseek(user_sid_file, 0, SEEK_END);
+            user_sid_size = (int)ftell(user_sid_file);
+            fseek(user_sid_file, cur_pos, SEEK_SET);
+            if (user_sid_size > 0)
+            {
+                user_sid_buffer = (uint8_t *)calloc(user_sid_size, 1);
+                if (fread(user_sid_buffer, 1, user_sid_size, user_sid_file) != user_sid_size)
+                {
+                    free(user_sid_buffer);
+                    user_sid_buffer = NULL;
+                    user_sid_size = 0;
+                }
+            }
+            fclose(user_sid_file);
+            user_sid_file = NULL;
+        }
+    }
     return (sapp_desc){
         .init_userdata_cb = init,
         .frame_userdata_cb = frame,
