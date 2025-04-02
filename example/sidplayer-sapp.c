@@ -56,6 +56,11 @@ static void init(void* user_data) {
     {
         cRSID_initSIDtune(sidplayer_c64, sidplayer_header, 0);
     }
+    else
+    {
+        printf("SIDPlayer: Error starting playback\n");
+        exit(EXIT_FAILURE);
+    }
 
     // setup sokol_audio (default sample rate is 44100Hz)
     saudio_setup(&(saudio_desc){
@@ -114,6 +119,11 @@ sapp_desc sokol_main(int argc, char* argv[]) {
             }
             fclose(user_sid_file);
             user_sid_file = NULL;
+        }
+        else
+        {
+            printf("Error opening %s (is this an RSID/PSID file?)\n", argv[1]);
+            printf("Will fallback to embedded song.\n");
         }
     }
     return (sapp_desc){
