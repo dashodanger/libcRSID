@@ -4,7 +4,7 @@ This is a single-header adaptation of the library version of cRSID for embedding
 # Compilation
 Define CRSID_IMPLEMENTATION before including libcRSID.h in one source file within your project. It can then be included anywhere else that it needs to be referenced.
 
-To compile a test program, please use the CMakeLists file in the `example` directory. It will build a small program that displays a window and replays an embedded SID file.
+To compile a test program, please use the CMakeLists file in the `example` directory. It will build a small program that displays a window and replays an embedded SID file, or if passed a filepath as the first parameter will attempt to play it.
 - The test program uses the Sokol libraries which are zlib-licensed and is based on the mod player example from sokol-samples, which is MIT licensed. Neither of these licenses affect libcRSID when compiled on its own.
 
 # Usage
