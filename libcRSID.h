@@ -1,7 +1,27 @@
+//-----------------------------------------------------------------------------------------------------
 // cRSID lightweight RealSID (integer-only) library-header (with API-calls) by Hermit (Mihaly Horvath)
-
+//
+// Copyright (c) 2024-2025 dashodanger (libcRSID/single-header implementation)
+// Copyright (c) 2022 Hermit (Mihaly Horvath) (original implementation)
+// 
+// Permission to use, copy, modify, and/or distribute this software for any
+// purpose with or without fee is hereby granted.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+// REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+// AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+// INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+// LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+// OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+// 
+//-----------------------------------------------------------------------------------------------------
 // Define `CRSID_IMPLEMENTATION` in *one* C/C++ file before including this
 // library to create the implementation.
+//-----------------------------------------------------------------------------------------------------
+
+#ifndef CRSID_HEADER
+#define CRSID_HEADER
 
 #ifdef __cplusplus
 extern "C"
@@ -189,10 +209,7 @@ extern "C"
         unsigned short SelectedSIDmodel;
         unsigned char  MainVolume;
         // SID-file related:
-        union {
-            cRSID_SIDheader *SIDheader;
-            char            *SIDfileData;
-        };
+        cRSID_SIDheader *SIDheader;
         unsigned short Attenuation;
         char           RealSIDmode;
         char           PSIDdigiMode;
@@ -250,12 +267,9 @@ extern "C"
 }
 #endif
 
-#ifdef CRSID_IMPLEMENTATION
+#endif // CRSID_HEADER
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#ifdef CRSID_IMPLEMENTATION
 
 #if defined _MSC_VER || (defined __SIZEOF_FLOAT__ && __SIZEOF_FLOAT__ == 4)
 #include <stdint.h>
@@ -3882,7 +3896,7 @@ cRSID_C64instance *cRSID_init(unsigned short samplerate)
 {
     static cRSID_C64instance *C64 = &cRSID_C64;
 
-    C64->HighQualitySID   = 1;
+    C64->HighQualitySID   = 0;
     C64->Stereo           = 0;
     C64->SelectedSIDmodel = 0;
     C64->PlaybackSpeed    = 1; // default model and mode selections
@@ -3985,9 +3999,5 @@ void cRSID_initSIDtune(cRSID_C64instance *C64, cRSID_SIDheader *SIDheader, char 
         C64->Returned = 0;
     }
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
