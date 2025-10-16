@@ -38,8 +38,6 @@
 
 static cRSID_C64instance *sidplayer_c64 = NULL;
 static bool sid_playing = false;
-static uint8_t *sid_buffer = NULL;
-static long sid_size = 0;
 
 // stream callback, called by sokol_audio when new samples are needed,
 // on most platforms, this runs on a separate thread
@@ -53,7 +51,7 @@ static void stream_cb(float* buffer, int num_frames, int num_channels)
 
 static void print_help() 
 {
-	printf("\nUsage: sidplayer [song=file]\n"
+	printf("\nUsage: sidplayer hq=<true/false> [song=file]\n"
 		   "\n"
 		   "Supported song formats:\n"
 		   "- PSID\n"
@@ -69,7 +67,7 @@ int main(int argc, char *argv[])
 	init_args.argv = argv;
 	sargs_setup(&init_args);
 
-	if (sargs_exists("help") || (sargs_num_args() > 1 && !sargs_exists("song"))) 
+	if (sargs_exists("help") || !sargs_exists("hq")) 
     {
 		print_help();
 		sargs_shutdown();
@@ -98,7 +96,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
     }
    
-    sidplayer_c64 = cRSID_init(saudio_sample_rate());
+    sidplayer_c64 = cRSID_init(saudio_sample_rate(), sargs_boolean("hq"));
     if (sidplayer_c64 == NULL)
     {
         saudio_shutdown();
@@ -112,24 +110,9 @@ int main(int argc, char *argv[])
     cRSID_SIDheader *loaded_track = NULL;
 
 	if (*song != '\0')
-    {
-        FILE *sid_file = fopen(song, "rb");
-        if (sid_file != NULL)
-        {
-            fseek(sid_file, 0, SEEK_END);
-            sid_size = (int)ftell(sid_file);
-            fseek(sid_file, 0, SEEK_SET);
-            if (sid_size > 0)
-            {
-                sid_buffer = (uint8_t *)malloc(sid_size);
-                if (sid_buffer != NULL && fread(sid_buffer, sid_size, 1, sid_file) == 1)
-                    loaded_track = cRSID_processSIDfile(sidplayer_c64, sid_buffer, sid_size);
-            }
-            fclose(sid_file);
-        }
-    }
+        loaded_track = cRSID_processSIDfile(sidplayer_c64, song);
     else
-        loaded_track = cRSID_processSIDfile(sidplayer_c64, edge_of_disgrace, sizeof(edge_of_disgrace));
+        loaded_track = cRSID_processSIDbuffer(sidplayer_c64, edge_of_disgrace, sizeof(edge_of_disgrace));
         
     if (loaded_track != NULL)
     {
@@ -141,8 +124,6 @@ int main(int argc, char *argv[])
         printf("sidplayer: Error starting playback\n");
         saudio_shutdown();
         sargs_shutdown();
-        if (sid_buffer != NULL)
-            free(sid_buffer);
         exit(EXIT_FAILURE);
     }
 
@@ -155,8 +136,8 @@ int main(int argc, char *argv[])
 	saudio_shutdown();
 	sargs_shutdown();
 
-    if (sid_buffer != NULL)
-        free(sid_buffer);
+    // hard-reset, frees memory that was allocated if an external song was loaded
+    cRSID_reset(sidplayer_c64);
 
 	return EXIT_SUCCESS;
 }
